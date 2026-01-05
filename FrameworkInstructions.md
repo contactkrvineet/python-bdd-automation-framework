@@ -1,574 +1,58 @@
-# Python BDD Automation Framework
-
-[![Python Version](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/)
-[![Behave](https://img.shields.io/badge/behave-1.3.3-green.svg)](https://behave.readthedocs.io/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-
-A comprehensive BDD (Behavior-Driven Development) automation framework using Python, Behave, Selenium, and Allure for API and UI testing.
+# Python BDD Automation Framework - Complete Setup Guide (Updated 2025)
 
 ## 📋 Table of Contents
-
-1. [Framework Overview](#framework-overview)
-2. [Framework Structure](#framework-structure)
-3. [Quick Start](#quick-start)
-4. [Running Tests](#running-tests)
-5. [Viewing Reports](#viewing-reports)
-6. [GitHub Actions CI/CD](#github-actions-cicd)
-7. [Configuration](#configuration)
-8. [Best Practices](#best-practices)
+1. [Prerequisites](#prerequisites)
+2. [Project Setup](#project-setup)
+3. [File Structure](#file-structure)
+4. [Step-by-Step Implementation](#step-by-step-implementation)
+5. [Running Tests](#running-tests)
+6. [Generating Reports](#generating-reports)
 
 ---
 
-## Framework Overview
+## Prerequisites
 
-This framework provides:
-
-- ✅ **BDD Testing** with Gherkin syntax for readable test scenarios
-- ✅ **API Testing** with requests library and custom API client
-- ✅ **UI Testing** with Selenium WebDriver and Page Object Model
-- ✅ **Dual Reporting** - Allure (interactive) and Behave HTML (simple)
-- ✅ **Multi-Environment** support (dev, staging, prod)
-- ✅ **CI/CD Ready** with GitHub Actions integration
-- ✅ **Tag-based Execution** for flexible test organization
-
----
-
-## Framework Structure
-
-```
-python-bdd-automation-framework/
-│
-├── .github/
-│   └── workflows/
-│       └── tests.yml              # GitHub Actions CI/CD pipeline
-│
-├── features/                      # BDD feature files and step definitions
-│   ├── api/                       # API feature files
-│   │   └── user_api.feature       # User API test scenarios
-│   ├── ui/                        # UI feature files
-│   │   └── login.feature          # Login UI test scenarios
-│   ├── steps/                     # Step definitions (glue code)
-│   │   ├── api_steps.py           # API test steps
-│   │   └── ui_steps.py            # UI test steps
-│   └── environment.py             # Behave hooks (before/after)
-│
-├── pages/                         # Page Object Model (UI)
-│   ├── base_page.py               # Base page with common methods
-│   └── login_page.py              # Login page object
-│
-├── api/                           # API clients
-│   └── base_api_client.py         # Reusable API client with logging
-│
-├── config/                        # Configuration files
-│   ├── config.py                  # Main configuration class
-│   └── environments/              # Environment-specific configs
-│       ├── dev.yaml               # Development environment
-│       ├── staging.yaml           # Staging environment
-│       └── prod.yaml              # Production environment
-│
-├── utilities/                     # Helper utilities
-│   ├── logger.py                  # Colored logging utility
-│   ├── screenshot_helper.py       # Screenshot capture for UI tests
-│   └── data_generator.py         # Test data generator (Faker)
-│
-├── reports/                       # Test reports (auto-generated)
-│   ├── allure-results/            # Allure test results
-│   ├── allure-report/             # Allure HTML report
-│   └── behave-html/               # Behave HTML report
-│
-├── logs/                          # Execution logs
-│
-├── data/                          # Test data files
-│
-├── tests/                         # Additional pytest tests (optional)
-│
-├── requirements.txt               # Python dependencies
-├── Makefile                       # Quick commands for test execution
-├── run_tests.sh                   # Shell script for running tests
-├── serve_allure.sh                # Script to serve Allure reports
-├── QUICK_START.md                 # Quick start guide
-└── README.md                      # This file
-```
-
-### Key Components:
-
-#### 1. **Feature Files** (`features/*.feature`)
-
-- Written in Gherkin (Given-When-Then) syntax
-- Readable by non-technical stakeholders
-- Tagged for flexible test execution
-
-#### 2. **Step Definitions** (`features/steps/*.py`)
-
-- Python code that implements feature file steps
-- Reusable across multiple scenarios
-- Supports data-driven testing with tables
-
-#### 3. **Page Objects** (`pages/*.py`)
-
-- Encapsulates UI elements and interactions
-- Promotes code reusability and maintainability
-- Reduces code duplication
-
-#### 4. **API Clients** (`api/*.py`)
-
-- Reusable HTTP client with automatic logging
-- Allure integration for request/response tracking
-- Supports authentication and custom headers
-
-#### 5. **Configuration** (`config/`)
-
-- Environment-specific settings (URLs, credentials)
-- Runtime configuration for browsers, timeouts
-- YAML-based for easy editing
-
----
-
-## Quick Start
-
-### Prerequisites
-
-- **Python 3.10** - [Download](https://www.python.org/downloads/)
-- **Allure** - `brew install allure` (macOS) or [Download](https://github.com/allure-framework/allure2/releases)
+### Required Software
+- **Python 3.8+** - [Download](https://www.python.org/downloads/)
+- **pip** (comes with Python)
 - **Git** - [Download](https://git-scm.com/downloads)
-- **Chrome Browser** (for UI tests)
+- **Chrome Browser** (or Firefox)
+- **IDE** - VS Code, PyCharm, or any Python IDE
 
-### Installation
-
+### Verify Installation
 ```bash
-# Clone the repository
-git clone <your-repo-url>
+python --version  # Should show 3.8 or higher
+pip --version
+git --version
+```
+
+---
+
+## Project Setup
+
+### Step 1: Create Project Directory
+```bash
+# Create project folder
+mkdir python-bdd-automation-framework
 cd python-bdd-automation-framework
 
-# Create virtual environment with Python 3.10
-python3.10 -m venv venv
+# Initialize git
+git init
+```
+
+### Step 2: Create Virtual Environment
+```bash
+# Create virtual environment
+python -m venv venv
 
 # Activate virtual environment
-source venv/bin/activate  # macOS/Linux
-# OR
-venv\Scripts\activate     # Windows
-
-# Install dependencies
-pip install --upgrade pip setuptools wheel
-pip install -r requirements.txt
-pip install behave-html-pretty-formatter
-
-# Verify installation
-# Verify installation
-venv/bin/behave --version
-allure --version
-```
-
----
-
-## Running Tests
-
-### Method 1: Using Makefile (Recommended)
-
-```bash
-# Run API tests with @get tag
-make test-api
-
-# Run UI tests with @ui tag
-make test-ui
-
-# Run all tests
-make test
-
-# Clean reports and cache
-make clean
-```
-
-### Method 2: Using Shell Script
-
-```bash
-# Run tests with automatic report generation
-./run_tests.sh
-```
-
-### Method 3: Manual Command
-
-```bash
-# Run specific tag
-venv/bin/behave \
-  -f allure_behave.formatter:AllureFormatter -o reports/allure-results \
-  -f behave_html_pretty_formatter:PrettyHTMLFormatter -o reports/behave-html/report.html \
-  -t @get --no-skipped
-
-# Run all API tests
-venv/bin/behave \
-  -f allure_behave.formatter:AllureFormatter -o reports/allure-results \
-  -f behave_html_pretty_formatter:PrettyHTMLFormatter -o reports/behave-html/report.html \
-  -t @api
-
-# Run without tags (all tests)
-venv/bin/behave \
-  -f allure_behave.formatter:AllureFormatter -o reports/allure-results \
-  -f behave_html_pretty_formatter:PrettyHTMLFormatter -o reports/behave-html/report.html
-```
-
-### Available Tags
-
-| Tag           | Description            | Example                          |
-| ------------- | ---------------------- | -------------------------------- |
-| `@api`        | All API tests          | `venv/bin/behave -t @api`        |
-| `@ui`         | All UI tests           | `venv/bin/behave -t @ui`         |
-| `@get`        | API GET request tests  | `venv/bin/behave -t @get`        |
-| `@post`       | API POST request tests | `venv/bin/behave -t @post`       |
-| `@smoke`      | Smoke tests            | `venv/bin/behave -t @smoke`      |
-| `@regression` | Regression tests       | `venv/bin/behave -t @regression` |
-
-### Tag Combinations
-
-```bash
-# Multiple tags (AND) - must have both
-venv/bin/behave -t @api -t @smoke
-
-# Multiple tags (OR) - can have either
-venv/bin/behave -t @api,@ui
-
-# Exclude tags
-venv/bin/behave -t ~@ui  # Run all except UI tests
-```
-
-### Environment Selection
-
-```bash
-# Run tests on staging environment
-ENV=staging venv/bin/behave -t @api
-
-# Run tests on production
-ENV=prod venv/bin/behave -t @smoke
-```
-
----
-
-## Viewing Reports
-
-### 1. Behave HTML Report
-
-Simple, static HTML report that can be opened directly:
-
-```bash
-# Open in browser
-open reports/behave-html/report.html  # macOS
-xdg-open reports/behave-html/report.html  # Linux
-start reports/behave-html/report.html  # Windows
-```
-
-### 2. Allure Report
-
-Interactive, feature-rich report with proper server:
-
-```bash
-# Option 1: Use Allure serve (Recommended)
-allure serve reports/allure-results
-
-# Option 2: Use helper script
-./serve_allure.sh
-
-# Option 3: Generate static report (for CI/CD)
-allure generate reports/allure-results -o reports/allure-report --clean
-```
-
-**Why use `allure serve`?**
-
-- Opens report with built-in HTTP server
-- Avoids CORS issues with JavaScript
-- Auto-refreshes on changes
-- Press Ctrl+C to stop the server
-
-### Report Features
-
-**Behave HTML Report includes:**
-
-- ✅ Scenario execution status
-- ✅ Step-by-step details
-- ✅ Execution time
-- ✅ Simple, clean interface
-
-**Allure Report includes:**
-
-- ✅ All Behave HTML features plus:
-- ✅ Test history and trends
-- ✅ Screenshots and logs
-- ✅ Request/Response details for API tests
-- ✅ Retry information
-- ✅ Categories and behaviors
-- ✅ Timeline visualization
-- ✅ Graphical charts
-
----
-
-## GitHub Actions CI/CD
-
-### Setup
-
-1. **Push your code to GitHub**:
-
-```bash
-git add .
-git commit -m "Initial commit"
-git push origin main
-```
-
-2. **GitHub Actions will automatically**:
-   - Run on every push and pull request
-   - Execute all tests with `@smoke` tag
-   - Generate Allure report
-   - Publish report as GitHub Pages (optional)
-   - Upload reports as artifacts
-
-### Viewing CI/CD Results
-
-1. Go to your GitHub repository
-2. Click on **Actions** tab
-3. Select the latest workflow run
-4. View test results and download reports from **Artifacts** section
-
-### Manual Workflow Trigger
-
-You can manually trigger the workflow with custom tags:
-
-1. Go to **Actions** tab
-2. Select "**BDD Tests**" workflow
-3. Click **Run workflow**
-4. Enter custom tags (e.g., `@api`, `@regression`)
-5. Click **Run workflow**
-
-### GitHub Pages for Allure Report
-
-To enable automatic Allure report publishing:
-
-1. Go to repository **Settings** > **Pages**
-2. Source: **GitHub Actions**
-3. After each test run, report will be available at:
-   `https://<username>.github.io/<repo-name>/`
-
----
-
-## Configuration
-
-### Environment Configuration
-
-Edit files in `config/environments/` to customize per environment:
-
-```yaml
-# config/environments/dev.yaml
-environment: dev
-base_url: https://dev.example.com
-api_base_url: https://api-dev.example.com
-credentials:
-  username: testuser@example.com
-  password: TestPass123
-timeout:
-  api: 30
-  ui: 20
-```
-
-### Runtime Configuration
-
-Set environment variables:
-
-```bash
-# Browser selection
-BROWSER=firefox venv/bin/behave -t @ui
-
-# Headless mode
-HEADLESS=true venv/bin/behave -t @ui
-
-# Environment selection
-ENV=staging venv/bin/behave -t @api
-
-# Open reports automatically after execution
-OPEN_REPORT=true venv/bin/behave -t @smoke
-```
-
-### Behave Configuration
-
-Edit `behave.ini` for Behave-specific settings:
-
-```ini
-[behave]
-default_tags = -@wip -@skip
-show_skipped = false
-show_timings = true
-color = true
-```
-
----
-
-## Best Practices
-
-### 1. **Writing Feature Files**
-
-```gherkin
-Feature: User Authentication
-  As a user
-  I want to log in to the application
-  So that I can access my account
-
-  Background:
-    Given I am on the login page
-
-  @smoke @ui
-  Scenario: Successful login with valid credentials
-    When I enter username "testuser@example.com"
-    And I enter password "TestPass123"
-    And I click the login button
-    Then I should be redirected to the dashboard
-    And I should see the welcome message
-
-  @ui @negative
-  Scenario Outline: Login fails with invalid credentials
-    When I enter username "<username>"
-    And I enter password "<password>"
-    And I click the login button
-    Then I should see an error message "<error>"
-
-    Examples:
-      | username              | password    | error                |
-      | invalid@example.com   | TestPass123 | Invalid credentials  |
-      | testuser@example.com  | wrongpass   | Invalid credentials  |
-```
-
-### 2. **Organizing Tests with Tags**
-
-- Use `@smoke` for critical path tests
-- Use `@regression` for full test suite
-- Use `@wip` (work in progress) for tests under development
-- Use `@skip` for temporarily disabled tests
-
-### 3. **Page Object Pattern**
-
-```python
-# Good: Using Page Object
-login_page = LoginPage(driver)
-login_page.login("user@test.com", "pass123")
-
-# Bad: Direct element interaction in step
-driver.find_element(By.ID, "username").send_keys("user@test.com")
-```
-
-### 4. **API Testing**
-
-```python
-# Good: Using API client with logging
-response = api_client.get("/api/users")
-assert response.status_code == 200
-
-# Bad: Direct requests without logging
-response = requests.get("https://api.com/users")
-```
-
-### 5. **Data Management**
-
-```python
-# Good: Using Faker for dynamic data
-user_data = DataGenerator().generate_user_data()
-
-# Bad: Hardcoded test data
-user_data = {"email": "test@test.com", "name": "Test User"}
-```
-
----
-
-## Troubleshooting
-
-### Common Issues
-
-#### 1. **ModuleNotFoundError**
-
-**Problem**: Missing Python packages
-
-**Solution**:
-
-```bash
+# On Windows:
+venv\Scripts\activate
+# On Mac/Linux:
 source venv/bin/activate
-pip install -r requirements.txt
-pip install behave-html-pretty-formatter
 ```
 
-#### 2. **Allure report keeps loading**
-
-**Problem**: Opening HTML directly causes CORS issues
-
-**Solution**:
-
-```bash
-# Use allure serve instead
-allure serve reports/allure-results
-```
-
-#### 3. **Tests not executing with tags**
-
-**Problem**: Running `behave -t @get` executes all tests
-
-**Solution**: Use venv's behave:
-
-```bash
-venv/bin/behave -t @get --no-skipped
-```
-
-#### 4. **Virtual environment issues**
-
-**Problem**: Packages installing globally instead of venv
-
-**Solution**:
-
-```bash
-# Recreate venv
-rm -rf venv
-python3.10 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-#### 5. **WebDriver errors**
-
-**Problem**: ChromeDriver not found or version mismatch
-
-**Solution**: The framework uses `webdriver-manager` which auto-downloads drivers. Ensure it's installed:
-
-```bash
-pip install webdriver-manager
-```
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-## Support
-
-For issues and questions:
-
-- 📧 Email: your-email@example.com
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/python-bdd-automation-framework/issues)
-- 📖 Documentation: [Wiki](https://github.com/yourusername/python-bdd-automation-framework/wiki)
-
----
-
-## Acknowledgments
-
-- [Behave](https://behave.readthedocs.io/) - BDD framework for Python
-- [Selenium](https://www.selenium.dev/) - Browser automation
-- [Allure](https://docs.qameta.io/allure/) - Test reporting framework
-- [Requests](https://requests.readthedocs.io/) - HTTP library for Python
-
+### Step 3: Create Project Structure
 ```bash
 # Create main directories
 mkdir -p features/api features/ui features/steps
@@ -651,7 +135,6 @@ python-bdd-automation-framework/
 Your updated `requirements.txt` is already provided with latest versions.
 
 Install dependencies:
-
 ```bash
 pip install -r requirements.txt
 ```
@@ -659,19 +142,16 @@ pip install -r requirements.txt
 ### Step 5: Install Allure (for Reports)
 
 **Windows (using Scoop):**
-
 ```bash
 scoop install allure
 ```
 
 **Mac:**
-
 ```bash
 brew install allure
 ```
 
 **Linux:**
-
 ```bash
 sudo apt-add-repository ppa:qameta/allure
 sudo apt-get update
@@ -679,7 +159,6 @@ sudo apt-get install allure
 ```
 
 **Verify Allure installation:**
-
 ```bash
 allure --version
 ```
@@ -689,7 +168,6 @@ allure --version
 ### Step 6: Create Configuration Files
 
 #### config/config.py
-
 ```python
 import os
 import yaml
@@ -702,22 +180,22 @@ class Config:
     REPORTS_DIR = BASE_DIR / 'reports'
     LOGS_DIR = BASE_DIR / 'logs'
     DATA_DIR = BASE_DIR / 'data'
-
+    
     # Browser settings
     BROWSER = os.getenv('BROWSER', 'chrome')
     HEADLESS = os.getenv('HEADLESS', 'false').lower() == 'true'
-
+    
     # Timeout settings
     IMPLICIT_WAIT = 10
     EXPLICIT_WAIT = 20
     PAGE_LOAD_TIMEOUT = 30
-
+    
     # Screenshot settings
     SCREENSHOT_ON_FAILURE = True
-
+    
     # Environment
     ENV = os.getenv('ENV', 'dev')
-
+    
     @classmethod
     def load_environment_config(cls):
         """Load environment-specific configuration"""
@@ -726,12 +204,12 @@ class Config:
             with open(env_file, 'r') as f:
                 return yaml.safe_load(f)
         return {}
-
+    
     @classmethod
     def get_base_url(cls):
         env_config = cls.load_environment_config()
         return env_config.get('base_url', 'https://example.com')
-
+    
     @classmethod
     def get_api_base_url(cls):
         env_config = cls.load_environment_config()
@@ -739,7 +217,6 @@ class Config:
 ```
 
 #### config/environments/dev.yaml
-
 ```yaml
 environment: dev
 base_url: https://dev.example.com
@@ -756,7 +233,6 @@ timeout:
 ```
 
 #### config/environments/staging.yaml
-
 ```yaml
 environment: staging
 base_url: https://staging.example.com
@@ -770,7 +246,6 @@ timeout:
 ```
 
 #### config/environments/prod.yaml
-
 ```yaml
 environment: prod
 base_url: https://www.example.com
@@ -788,7 +263,6 @@ timeout:
 ### Step 7: Create Utility Files
 
 #### utilities/logger.py
-
 ```python
 import logging
 import colorlog
@@ -801,30 +275,30 @@ class Logger:
         """Create and configure logger with color support"""
         logger = logging.getLogger(name)
         logger.setLevel(logging.DEBUG)
-
+        
         # Avoid adding handlers multiple times
         if logger.handlers:
             return logger
-
+        
         # Create logs directory if not exists
         log_dir = Path(__file__).resolve().parent.parent / 'logs'
         log_dir.mkdir(exist_ok=True)
-
+        
         # File handler
         log_file = log_dir / f'test_execution_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging.DEBUG)
-
+        
         # Console handler with colors
         console_handler = colorlog.StreamHandler()
         console_handler.setLevel(logging.INFO)
-
+        
         # Formatters
         file_formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
-
+        
         console_formatter = colorlog.ColoredFormatter(
             '%(log_color)s%(levelname)-8s%(reset)s %(blue)s%(message)s',
             datefmt='%Y-%m-%d %H:%M:%S',
@@ -836,18 +310,17 @@ class Logger:
                 'CRITICAL': 'red,bg_white',
             }
         )
-
+        
         file_handler.setFormatter(file_formatter)
         console_handler.setFormatter(console_formatter)
-
+        
         logger.addHandler(file_handler)
         logger.addHandler(console_handler)
-
+        
         return logger
 ```
 
 #### utilities/screenshot_helper.py
-
 ```python
 import os
 from datetime import datetime
@@ -861,31 +334,30 @@ class ScreenshotHelper:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         screenshot_dir = Path(__file__).resolve().parent.parent / 'reports' / 'screenshots'
         screenshot_dir.mkdir(parents=True, exist_ok=True)
-
+        
         screenshot_name = f"{name}_{timestamp}.png"
         screenshot_path = screenshot_dir / screenshot_name
-
+        
         driver.save_screenshot(str(screenshot_path))
-
+        
         # Attach to Allure report
         allure.attach(
             driver.get_screenshot_as_png(),
             name=screenshot_name,
             attachment_type=allure.attachment_type.PNG
         )
-
+        
         return str(screenshot_path)
 ```
 
 #### utilities/data_generator.py
-
 ```python
 from faker import Faker
 
 class DataGenerator:
     def __init__(self):
         self.fake = Faker()
-
+    
     def generate_user_data(self):
         """Generate random user data"""
         return {
@@ -897,19 +369,19 @@ class DataGenerator:
             'company': self.fake.company(),
             'job_title': self.fake.job()
         }
-
+    
     def generate_email(self):
         return self.fake.email()
-
+    
     def generate_password(self, length=12):
         return self.fake.password(length=length, special_chars=True, digits=True, upper_case=True, lower_case=True)
-
+    
     def generate_name(self):
         return self.fake.name()
-
+    
     def generate_address(self):
         return self.fake.address()
-
+    
     def generate_phone(self):
         return self.fake.phone_number()
 ```
@@ -919,7 +391,6 @@ class DataGenerator:
 ### Step 8: Create Base Page Object
 
 #### pages/base_page.py
-
 ```python
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -933,12 +404,12 @@ class BasePage:
         self.driver = driver
         self.wait = WebDriverWait(driver, Config.EXPLICIT_WAIT)
         self.logger = Logger.get_logger(self.__class__.__name__)
-
+    
     def navigate_to(self, url):
         """Navigate to URL"""
         self.logger.info(f"Navigating to: {url}")
         self.driver.get(url)
-
+    
     def find_element(self, locator):
         """Find element with explicit wait"""
         try:
@@ -947,7 +418,7 @@ class BasePage:
         except TimeoutException:
             self.logger.error(f"Element not found: {locator}")
             raise
-
+    
     def find_elements(self, locator):
         """Find multiple elements"""
         try:
@@ -956,27 +427,27 @@ class BasePage:
         except TimeoutException:
             self.logger.error(f"Elements not found: {locator}")
             return []
-
+    
     def click_element(self, locator):
         """Click element"""
         element = self.wait.until(EC.element_to_be_clickable(locator))
         element.click()
         self.logger.info(f"Clicked element: {locator}")
-
+    
     def enter_text(self, locator, text):
         """Enter text into element"""
         element = self.find_element(locator)
         element.clear()
         element.send_keys(text)
         self.logger.info(f"Entered text '{text}' into: {locator}")
-
+    
     def get_text(self, locator):
         """Get text from element"""
         element = self.find_element(locator)
         text = element.text
         self.logger.info(f"Retrieved text '{text}' from: {locator}")
         return text
-
+    
     def is_element_visible(self, locator, timeout=10):
         """Check if element is visible"""
         try:
@@ -985,7 +456,7 @@ class BasePage:
             return True
         except TimeoutException:
             return False
-
+    
     def is_element_present(self, locator):
         """Check if element is present in DOM"""
         try:
@@ -993,7 +464,7 @@ class BasePage:
             return True
         except NoSuchElementException:
             return False
-
+    
     def wait_for_element_to_disappear(self, locator, timeout=10):
         """Wait for element to disappear"""
         try:
@@ -1002,33 +473,33 @@ class BasePage:
             return True
         except TimeoutException:
             return False
-
+    
     def hover_over_element(self, locator):
         """Hover over element"""
         element = self.find_element(locator)
         actions = ActionChains(self.driver)
         actions.move_to_element(element).perform()
         self.logger.info(f"Hovered over element: {locator}")
-
+    
     def get_current_url(self):
         """Get current URL"""
         return self.driver.current_url
-
+    
     def get_page_title(self):
         """Get page title"""
         return self.driver.title
-
+    
     def refresh_page(self):
         """Refresh current page"""
         self.driver.refresh()
         self.logger.info("Page refreshed")
-
+    
     def switch_to_frame(self, frame_locator):
         """Switch to iframe"""
         frame = self.find_element(frame_locator)
         self.driver.switch_to.frame(frame)
         self.logger.info(f"Switched to frame: {frame_locator}")
-
+    
     def switch_to_default_content(self):
         """Switch back to default content"""
         self.driver.switch_to.default_content()
@@ -1036,7 +507,6 @@ class BasePage:
 ```
 
 #### pages/login_page.py
-
 ```python
 from selenium.webdriver.common.by import By
 from pages.base_page import BasePage
@@ -1050,46 +520,46 @@ class LoginPage(BasePage):
     ERROR_MESSAGE = (By.CLASS_NAME, "error-message")
     WELCOME_MESSAGE = (By.XPATH, "//h1[contains(text(), 'Welcome')]")
     LOGOUT_BUTTON = (By.ID, "logout")
-
+    
     def __init__(self, driver):
         super().__init__(driver)
         self.url = f"{Config.get_base_url()}/login"
-
+    
     def navigate_to_login(self):
         """Navigate to login page"""
         self.navigate_to(self.url)
-
+    
     def enter_username(self, username):
         """Enter username"""
         self.enter_text(self.USERNAME_INPUT, username)
-
+    
     def enter_password(self, password):
         """Enter password"""
         self.enter_text(self.PASSWORD_INPUT, password)
-
+    
     def click_login_button(self):
         """Click login button"""
         self.click_element(self.LOGIN_BUTTON)
-
+    
     def login(self, username, password):
         """Complete login process"""
         self.logger.info(f"Logging in with username: {username}")
         self.enter_username(username)
         self.enter_password(password)
         self.click_login_button()
-
+    
     def get_error_message(self):
         """Get error message text"""
         return self.get_text(self.ERROR_MESSAGE)
-
+    
     def is_welcome_message_displayed(self):
         """Check if welcome message is displayed"""
         return self.is_element_visible(self.WELCOME_MESSAGE)
-
+    
     def is_error_message_displayed(self):
         """Check if error message is displayed"""
         return self.is_element_visible(self.ERROR_MESSAGE, timeout=5)
-
+    
     def logout(self):
         """Logout from application"""
         if self.is_element_visible(self.LOGOUT_BUTTON, timeout=5):
@@ -1102,7 +572,6 @@ class LoginPage(BasePage):
 ### Step 9: Create API Client
 
 #### api/base_api_client.py
-
 ```python
 import requests
 import allure
@@ -1119,7 +588,7 @@ class BaseAPIClient:
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         }
-
+    
     def _log_request(self, method, url, **kwargs):
         """Log request details"""
         self.logger.info(f"{method} request to: {url}")
@@ -1127,7 +596,7 @@ class BaseAPIClient:
             self.logger.debug(f"Request body: {json.dumps(kwargs['json'], indent=2)}")
         if 'params' in kwargs:
             self.logger.debug(f"Query params: {kwargs['params']}")
-
+    
     def _log_response(self, response):
         """Log response details"""
         self.logger.info(f"Response status: {response.status_code}")
@@ -1135,36 +604,36 @@ class BaseAPIClient:
             self.logger.debug(f"Response body: {json.dumps(response.json(), indent=2)}")
         except:
             self.logger.debug(f"Response text: {response.text}")
-
+    
     @allure.step("Send GET request to {endpoint}")
     def get(self, endpoint, params=None, headers=None):
         """Send GET request"""
         url = f"{self.base_url}{endpoint}"
         request_headers = {**self.headers, **(headers or {})}
-
+        
         self._log_request("GET", url, params=params)
         response = self.session.get(url, params=params, headers=request_headers)
         self._log_response(response)
-
+        
         # Attach to Allure
         allure.attach(
             f"URL: {url}\nMethod: GET\nParams: {params}",
             name="Request Details",
             attachment_type=allure.attachment_type.TEXT
         )
-
+        
         return response
-
+    
     @allure.step("Send POST request to {endpoint}")
     def post(self, endpoint, data=None, json=None, headers=None):
         """Send POST request"""
         url = f"{self.base_url}{endpoint}"
         request_headers = {**self.headers, **(headers or {})}
-
+        
         self._log_request("POST", url, json=json, data=data)
         response = self.session.post(url, data=data, json=json, headers=request_headers)
         self._log_response(response)
-
+        
         # Attach to Allure
         if json:
             allure.attach(
@@ -1172,55 +641,55 @@ class BaseAPIClient:
                 name="POST Request Body",
                 attachment_type=allure.attachment_type.JSON
             )
-
+        
         return response
-
+    
     @allure.step("Send PUT request to {endpoint}")
     def put(self, endpoint, data=None, json=None, headers=None):
         """Send PUT request"""
         url = f"{self.base_url}{endpoint}"
         request_headers = {**self.headers, **(headers or {})}
-
+        
         self._log_request("PUT", url, json=json, data=data)
         response = self.session.put(url, data=data, json=json, headers=request_headers)
         self._log_response(response)
-
+        
         return response
-
+    
     @allure.step("Send PATCH request to {endpoint}")
     def patch(self, endpoint, data=None, json=None, headers=None):
         """Send PATCH request"""
         url = f"{self.base_url}{endpoint}"
         request_headers = {**self.headers, **(headers or {})}
-
+        
         self._log_request("PATCH", url, json=json, data=data)
         response = self.session.patch(url, data=data, json=json, headers=request_headers)
         self._log_response(response)
-
+        
         return response
-
+    
     @allure.step("Send DELETE request to {endpoint}")
     def delete(self, endpoint, headers=None):
         """Send DELETE request"""
         url = f"{self.base_url}{endpoint}"
         request_headers = {**self.headers, **(headers or {})}
-
+        
         self._log_request("DELETE", url)
         response = self.session.delete(url, headers=request_headers)
         self._log_response(response)
-
+        
         return response
-
+    
     def set_auth_token(self, token):
         """Set authentication token"""
         self.headers['Authorization'] = f'Bearer {token}'
         self.logger.info("Authentication token set")
-
+    
     def set_header(self, key, value):
         """Set custom header"""
         self.headers[key] = value
         self.logger.info(f"Header set: {key}={value}")
-
+    
     def clear_headers(self):
         """Clear all custom headers"""
         self.headers = {
@@ -1235,7 +704,6 @@ class BaseAPIClient:
 ### Step 10: Create Feature Files
 
 #### features/ui/login.feature
-
 ```gherkin
 Feature: User Login Functionality
   As a user
@@ -1290,7 +758,6 @@ Feature: User Login Functionality
 ```
 
 #### features/api/user_api.feature
-
 ```gherkin
 Feature: User API Operations
   As an API client
@@ -1361,7 +828,6 @@ Feature: User API Operations
 ### Step 11: Create Step Definitions
 
 #### features/steps/ui_steps.py
-
 ```python
 from behave import given, when, then
 from selenium import webdriver
@@ -1438,7 +904,6 @@ def step_check_login_page(context):
 ```
 
 #### features/steps/api_steps.py
-
 ```python
 from behave import given, when, then
 import json
@@ -1468,28 +933,5 @@ def step_prepare_user_data(context):
 def step_send_get_request(context, endpoint):
     """Send GET request"""
     context.response = context.api_client.get(endpoint)
-
+    
     # Attach to
-
-
-
-    #Execution
-
-    venv/bin/behave -f allure_behave.formatter:AllureFormatter -o reports/allure-results -f behave_html_formatter:HTMLFormatter -o reports/behave-html/report.html -t @get
-allure generate reports/allure-results -o reports/allure-report --clean
-
-1.  rm -rf venv
-2. python3.10 -m venv venv
-2. python3.10 -m venv venv
-3. source venv/bin/activate
-python -m ensurepip --upgrade
-pip install --upgrade pip setuptools wheel
-4.pip install -r requirements.txt
-pip install behave behave-html-formatter==0.9.9
-5.behave -t @get
-
-
-
-
-    behave -f allure_behave.formatter:AllureFormatter -o reports/allure-results -f behave_html_formatter:HTMLFormatter -o reports/behave-html/report.html -t @get
-```

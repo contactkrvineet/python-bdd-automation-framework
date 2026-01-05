@@ -1,0 +1,9 @@
+environment: prod
+base_url: https://www.example.com
+api_base_url: https://api.example.com
+credentials:
+  username: produser@example.com
+  password: ProdPass123
+timeout:
+  api: 30
+  ui: 20

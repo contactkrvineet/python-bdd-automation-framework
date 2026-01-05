@@ -1,0 +1,13 @@
+
+environment: dev
+base_url: https://dev.example.com
+api_base_url: https://api-dev.example.com
+credentials:
+  username: testuser@example.com
+  password: TestPass123
+database:
+  host: localhost
+  port: 5432
+timeout:
+  api: 30
+  ui: 20
