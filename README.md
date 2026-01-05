@@ -663,7 +663,7 @@ After the next successful test run on `main` branch:
 **Main Dashboard:**
 
 ```
-https://YOUR_USERNAME.github.io/YOUR_REPO/
+https://contactkrvineet.github.io/python-bdd-automation-framework/
 ```
 
 This landing page provides a beautiful dashboard with links to both reports:
@@ -693,8 +693,9 @@ This landing page provides a beautiful dashboard with links to both reports:
 
 **Direct URLs:**
 
-- **Allure Report**: `https://YOUR_USERNAME.github.io/YOUR_REPO/allure-report/`
-- **Behave Report**: `https://YOUR_USERNAME.github.io/YOUR_REPO/behave-report/report.html`
+- **Reports**: 'https://contactkrvineet.github.io/python-bdd-automation-framework/'
+- **Allure Report**: `https://contactkrvineet.github.io/python-bdd-automation-framework/allure-report/index.html`
+- **Behave Report**: `https://contactkrvineet.github.io/python-bdd-automation-framework/behave-report/report.html`
 
 ### 🔄 How It Works
 
