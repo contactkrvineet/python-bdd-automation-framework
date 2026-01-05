@@ -58,20 +58,25 @@ GitHub Actions is enabled by default for public repositories. For private reposi
 3. Under "Actions permissions", select **Allow all actions and reusable workflows**
 4. Click **Save**
 
-### 3. Enable GitHub Pages (Optional - for Allure Report)
+### 3. Enable GitHub Pages (for Publishing Both Reports)
 
-To publish Allure reports automatically:
+To publish Allure and Behave reports automatically:
 
 1. Go to repository **Settings**
 2. Click **Pages** (in left sidebar)
 3. Under "Source", select **GitHub Actions**
 4. Click **Save**
 
-After the next successful test run, your Allure report will be available at:
+After the next successful test run, your reports will be available at:
 
 ```
 https://YOUR_USERNAME.github.io/YOUR_REPO/
 ```
+
+This landing page will provide links to both:
+
+- **Allure Report**: `https://YOUR_USERNAME.github.io/YOUR_REPO/allure-report/`
+- **Behave Report**: `https://YOUR_USERNAME.github.io/YOUR_REPO/behave-report/report.html`
 
 ---
 
@@ -213,13 +218,20 @@ In the workflow run page:
    - `allure-report` - Complete Allure HTML report
    - `test-logs` - Execution logs
 
-### 3. View Allure Report Online
+### 3. View Reports Online (GitHub Pages)
 
-If GitHub Pages is enabled:
+If GitHub Pages is enabled, visit the main dashboard:
 
 1. Go to `https://YOUR_USERNAME.github.io/YOUR_REPO/`
-2. View interactive Allure report
-3. Report updates after each successful run on `main` branch
+2. You'll see a landing page with links to both reports:
+   - **📊 Allure Report** - Interactive test analytics and history
+   - **📝 Behave Report** - BDD scenario execution details
+3. Reports update automatically after each successful run on `main` branch
+
+You can also access reports directly:
+
+- Allure: `https://YOUR_USERNAME.github.io/YOUR_REPO/allure-report/`
+- Behave: `https://YOUR_USERNAME.github.io/YOUR_REPO/behave-report/report.html`
 
 ### 4. Check Test Status
 

@@ -19,13 +19,13 @@ install:
 	pip install -r requirements.txt
 
 test-api:
-	@echo "Running API tests with @get tag..."
+	@echo "Running API tests with @api tag..."
 	@rm -rf reports/allure-results reports/allure-report reports/behave-html
 	@mkdir -p reports/allure-results reports/behave-html
 	venv/bin/behave \
 		-f allure_behave.formatter:AllureFormatter -o reports/allure-results \
 		-f behave_html_pretty_formatter:PrettyHTMLFormatter -o reports/behave-html/report.html \
-		--tags=@get --no-skipped
+		--tags=@api --no-skipped
 	@$(MAKE) report
 
 test-ui:
@@ -51,10 +51,9 @@ report:
 	@echo "=========================================="
 	@echo "Reports available:"
 	@echo "  Behave HTML: reports/behave-html/report.html"
-	@echo "  Allure: Use 'allure serve reports/allure-results'"
+	@echo "  Allure: Opening with server..."
 	@echo "=========================================="
 	@open reports/behave-html/report.html || true
 	@echo ""
-	@echo "To view Allure report with proper server:"
-	@echo "  allure serve reports/allure-results"
-	@echo ""
+	@echo "Launching Allure report server..."
+	@allure serve reports/allure-results

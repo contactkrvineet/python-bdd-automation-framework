@@ -63,8 +63,12 @@ def step_send_get(context, path):
 
 @when('I send a POST request to "{path}" with body')
 def step_post_with_body(context, path):
+    import time
     body_text = (context.text or "").strip()
     if body_text:
+        # Replace {timestamp} placeholder with actual timestamp
+        timestamp = str(int(time.time()))
+        body_text = body_text.replace("{timestamp}", timestamp)
         json_body = json.loads(body_text)
     else:
         json_body = getattr(context, "request_body", None)
@@ -91,6 +95,13 @@ def step_put_with_data(context, path):
 
 @when('I send a DELETE request to "{path}"')
 def step_delete(context, path):
+    # Replace variables in path like {user_id} with saved values
+    saved = getattr(context, "saved", {})
+    for var_name, var_value in saved.items():
+        placeholder = "{" + var_name + "}"
+        if placeholder in path:
+            path = path.replace(placeholder, str(var_value))
+    
     resp = context.client.delete(path, headers=context.auth_headers)
     context.response = resp
     context.response_json = None
@@ -146,6 +157,20 @@ def step_capture_field(context, key, var_name):
     context.saved = getattr(context, "saved", {})
     context.saved[var_name] = captured
 
+@then('capture response data field "{key}" as "{var_name}"')
+def step_capture_data_field(context, key, var_name):
+    data = context.response_json
+    assert data is not None, "Response is not JSON"
+    assert isinstance(data, dict), "Response is not an object"
+    assert "data" in data, "Response does not have 'data' field"
+    inner_data = data["data"]
+    assert isinstance(inner_data, dict), f"Expected 'data' to be an object, got {type(inner_data)}"
+    captured = inner_data.get(key)
+    assert captured is not None, f"Field '{key}' not found in response data"
+    context.saved = getattr(context, "saved", {})
+    context.saved[var_name] = captured
+    print(f"Captured {key}={captured} as {var_name}")
+
 @then('the response should be an array')
 def step_response_is_array(context):
     data = context.response_json
@@ -168,3 +193,23 @@ def step_response_array_not_empty(context):
         else:
             arr = data
     assert isinstance(arr, list) and len(arr) > 0, "Expected non-empty array"
+
+@then('the response field "{key}" should be {value}')
+def step_response_field_boolean(context, key, value):
+    data = context.response_json
+    assert data is not None, "Response is not JSON"
+    assert isinstance(data, dict), f"Expected response to be an object, got {type(data)}"
+    assert key in data, f"Field '{key}' not found in response"
+    expected = value.lower() == "true" if value.lower() in ["true", "false"] else value
+    actual = data[key]
+    assert actual == expected, f"Expected {key} to be {expected}, got {actual}"
+
+@then('the response data should contain field "{key}"')
+def step_response_data_has_field(context, key):
+    data = context.response_json
+    assert data is not None, "Response is not JSON"
+    assert isinstance(data, dict), "Response is not an object"
+    assert "data" in data, "Response does not have 'data' field"
+    inner_data = data["data"]
+    assert isinstance(inner_data, dict), f"Expected 'data' to be an object, got {type(inner_data)}"
+    assert key in inner_data, f"Field '{key}' not found in response data"
