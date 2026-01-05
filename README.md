@@ -4,18 +4,21 @@
 [![Behave](https://img.shields.io/badge/behave-1.3.3-green.svg)](https://behave.readthedocs.io/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A comprehensive BDD (Behavior-Driven Development) automation framework using Python, Behave, Selenium, and Allure for API and UI testing.
+A comprehensive BDD (Behavior-Driven Development) automation framework using Python, Behave, Selenium, and Allure for API and UI testing with automated CI/CD pipelines and live reporting.
 
 ## 📋 Table of Contents
 
 1. [Framework Overview](#framework-overview)
-2. [Framework Structure](#framework-structure)
-3. [Quick Start](#quick-start)
-4. [Running Tests](#running-tests)
-5. [Viewing Reports](#viewing-reports)
-6. [GitHub Actions CI/CD](#github-actions-cicd)
-7. [Configuration](#configuration)
-8. [Best Practices](#best-practices)
+2. [How the Framework Works](#how-the-framework-works)
+3. [Framework Structure](#framework-structure)
+4. [Quick Start](#quick-start)
+5. [Running Tests](#running-tests)
+6. [What is Makefile?](#what-is-makefile)
+7. [Viewing Reports](#viewing-reports)
+8. [Live Reports on GitHub Pages](#live-reports-on-github-pages)
+9. [GitHub Actions CI/CD](#github-actions-cicd)
+10. [Configuration](#configuration)
+11. [Best Practices](#best-practices)
 
 ---
 
@@ -30,6 +33,111 @@ This framework provides:
 - ✅ **Multi-Environment** support (dev, staging, prod)
 - ✅ **CI/CD Ready** with GitHub Actions integration
 - ✅ **Tag-based Execution** for flexible test organization
+- ✅ **Live Reports** published automatically to GitHub Pages
+- ✅ **Makefile Support** for simplified test execution
+
+---
+
+## How the Framework Works
+
+### 🎯 Core Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    1. Write Feature Files                       │
+│            (Human-readable Gherkin scenarios)                   │
+│         features/api/user_api.feature                          │
+│         features/ui/login.feature                              │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              2. Implement Step Definitions                      │
+│         (Python code that executes the steps)                   │
+│         features/steps/api_steps.py                            │
+│         features/steps/ui_steps.py                             │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│             3. Run Tests (Multiple Options)                     │
+│    • Makefile: make test-api, make test-ui, make test         │
+│    • Behave CLI: behave -t @smoke                              │
+│    • GitHub Actions: Automated CI/CD                           │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│           4. Generate Reports (Automatic)                       │
+│    • Allure Report: Interactive HTML with charts               │
+│    • Behave Report: Simple HTML summary                        │
+│    • Logs: Detailed execution logs                             │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              5. View Results                                    │
+│    Local:                                                       │
+│    • allure serve reports/allure-results                       │
+│    • open reports/behave-html/report.html                      │
+│                                                                 │
+│    CI/CD (GitHub Pages):                                       │
+│    • https://username.github.io/repo-name/                     │
+│      ├─ Allure Report                                          │
+│      └─ Behave Report                                          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 🔄 Test Execution Flow
+
+1. **Behave reads feature files** from `features/` directory
+2. **Matches steps** with step definitions in `features/steps/`
+3. **Executes scenarios** using:
+   - Page Objects for UI tests (`pages/`)
+   - API clients for API tests (`api/`)
+   - Configuration from `config/environments/`
+4. **Generates test results** in real-time:
+   - Allure JSON results → `reports/allure-results/`
+   - Behave HTML → `reports/behave-html/`
+5. **Hooks** in `features/environment.py` handle:
+   - Browser setup/teardown
+   - Screenshots on failure
+   - Logging configuration
+
+### 🏗️ Architecture Layers
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     Feature Files (Gherkin)                     │
+│                  Business-readable test cases                   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────────┐
+│                    Step Definitions Layer                       │
+│              Translates Gherkin to Python code                  │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+         ┌────────────────────┴────────────────────┐
+         │                                         │
+┌────────────────────┐                  ┌──────────────────────┐
+│   Page Objects     │                  │    API Clients       │
+│   (UI Tests)       │                  │   (API Tests)        │
+│  • login_page.py   │                  │ • base_api_client.py │
+│  • base_page.py    │                  │                      │
+└────────────────────┘                  └──────────────────────┘
+         │                                         │
+         └────────────────────┬────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────────┐
+│                    Utilities & Helpers                          │
+│     • Logger • Screenshot Helper • Data Generator               │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────────┐
+│                   Configuration Layer                           │
+│       Environment-specific settings (dev/staging/prod)          │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -40,87 +148,100 @@ python-bdd-automation-framework/
 │
 ├── .github/
 │   └── workflows/
-│       └── tests.yml              # GitHub Actions CI/CD pipeline
+│       └── tests.yml              # CI/CD pipeline - auto-runs tests & publishes reports
 │
 ├── features/                      # BDD feature files and step definitions
-│   ├── api/                       # API feature files
+│   ├── api/                       # API feature files (Gherkin)
 │   │   └── user_api.feature       # User API test scenarios
-│   ├── ui/                        # UI feature files
+│   ├── ui/                        # UI feature files (Gherkin)
 │   │   └── login.feature          # Login UI test scenarios
 │   ├── steps/                     # Step definitions (glue code)
-│   │   ├── api_steps.py           # API test steps
-│   │   └── ui_steps.py            # UI test steps
-│   └── environment.py             # Behave hooks (before/after)
+│   │   ├── api_steps.py           # Implements API test steps
+│   │   └── ui_steps.py            # Implements UI test steps
+│   └── environment.py             # Behave hooks (setup/teardown)
 │
-├── pages/                         # Page Object Model (UI)
+├── pages/                         # Page Object Model (UI automation)
 │   ├── base_page.py               # Base page with common methods
-│   └── login_page.py              # Login page object
+│   └── login_page.py              # Login page object with locators & methods
 │
 ├── api/                           # API clients
-│   └── base_api_client.py         # Reusable API client with logging
+│   └── base_api_client.py         # Reusable HTTP client with logging & Allure integration
 │
-├── config/                        # Configuration files
-│   ├── config.py                  # Main configuration class
+├── config/                        # Configuration management
+│   ├── config.py                  # Configuration loader class
 │   └── environments/              # Environment-specific configs
-│       ├── dev.yaml               # Development environment
-│       ├── staging.yaml           # Staging environment
-│       └── prod.yaml              # Production environment
+│       ├── dev.yaml               # Development environment settings
+│       ├── staging.yaml           # Staging environment settings
+│       └── prod.yaml              # Production environment settings
 │
 ├── utilities/                     # Helper utilities
-│   ├── logger.py                  # Colored logging utility
-│   ├── screenshot_helper.py       # Screenshot capture for UI tests
-│   └── data_generator.py         # Test data generator (Faker)
+│   ├── logger.py                  # Colored console logging
+│   ├── screenshot_helper.py       # Screenshot capture on test failures
+│   └── data_generator.py         # Fake test data generator (Faker)
 │
 ├── reports/                       # Test reports (auto-generated)
-│   ├── allure-results/            # Allure test results
-│   ├── allure-report/             # Allure HTML report
+│   ├── allure-results/            # Allure test results (JSON)
+│   ├── allure-report/             # Allure HTML report (generated)
 │   └── behave-html/               # Behave HTML report
+│       └── report.html            # Simple test execution report
 │
-├── logs/                          # Execution logs
+├── logs/                          # Execution logs (timestamped)
 │
-├── data/                          # Test data files
+├── data/                          # Test data files (JSON, CSV, etc.)
 │
 ├── tests/                         # Additional pytest tests (optional)
 │
 ├── requirements.txt               # Python dependencies
-├── Makefile                       # Quick commands for test execution
+├── Makefile                       # Quick commands for test execution (make test-api, etc.)
 ├── run_tests.sh                   # Shell script for running tests
-├── serve_allure.sh                # Script to serve Allure reports
+├── serve_allure.sh                # Script to serve Allure reports locally
 ├── QUICK_START.md                 # Quick start guide
+├── GITHUB_ACTIONS.md             # GitHub Actions CI/CD guide
+├── REPORTS_PUBLISHING_GUIDE.md   # Guide for publishing reports to GitHub Pages
 └── README.md                      # This file
 ```
 
-### Key Components:
+### 📁 Directory Structure Explained
 
-#### 1. **Feature Files** (`features/*.feature`)
+#### **Features Layer** (`features/`)
 
-- Written in Gherkin (Given-When-Then) syntax
-- Readable by non-technical stakeholders
-- Tagged for flexible test execution
+- **Purpose**: Contains business-readable test scenarios
+- **Structure Maintained**:
+  - Separate folders for API and UI tests
+  - Steps organized by test type (api_steps.py, ui_steps.py)
+  - Centralized hooks in environment.py
+- **Best Practice**: One feature file per feature/module
 
-#### 2. **Step Definitions** (`features/steps/*.py`)
+#### **Page Objects** (`pages/`)
 
-- Python code that implements feature file steps
-- Reusable across multiple scenarios
-- Supports data-driven testing with tables
+- **Purpose**: Encapsulates UI elements and interactions
+- **Structure Maintained**:
+  - base_page.py - Common methods (click, type, wait)
+  - Specific page classes inherit from base_page
+  - Locators defined as class variables
+- **Benefits**: Code reusability, easier maintenance
 
-#### 3. **Page Objects** (`pages/*.py`)
+#### **API Layer** (`api/`)
 
-- Encapsulates UI elements and interactions
-- Promotes code reusability and maintainability
-- Reduces code duplication
+- **Purpose**: Reusable HTTP clients for API testing
+- **Structure Maintained**:
+  - base_api_client.py handles all HTTP methods
+  - Automatic logging and Allure attachment
+  - Consistent error handling
 
-#### 4. **API Clients** (`api/*.py`)
+#### **Configuration** (`config/`)
 
-- Reusable HTTP client with automatic logging
-- Allure integration for request/response tracking
-- Supports authentication and custom headers
+- **Purpose**: Manage environment-specific settings
+- **Structure Maintained**:
+  - YAML files for each environment
+  - Single config.py loads the appropriate environment
+  - Easy to add new environments
 
-#### 5. **Configuration** (`config/`)
+#### **Reports** (`reports/`)
 
-- Environment-specific settings (URLs, credentials)
-- Runtime configuration for browsers, timeouts
-- YAML-based for easy editing
+- **Auto-generated**: Created automatically during test execution
+- **Contains**: Both Allure and Behave reports
+- **Lifecycle**: Cleaned before each test run, archived in CI/CD
 
 ---
 
@@ -163,13 +284,17 @@ allure --version
 
 ## Running Tests
 
-### Method 1: Using Makefile (Recommended)
+The framework provides multiple ways to execute tests, from simple Makefile commands to advanced Behave CLI options.
+
+### Method 1: Using Makefile (⭐ Recommended)
+
+Makefile provides the simplest way to run tests with pre-configured commands.
 
 ```bash
-# Run API tests with @get tag
+# Run API tests
 make test-api
 
-# Run UI tests with @ui tag
+# Run UI tests
 make test-ui
 
 # Run all tests
@@ -177,173 +302,708 @@ make test
 
 # Clean reports and cache
 make clean
+
+# Install dependencies
+make install
+
+# View available commands
+make help
 ```
 
-### Method 2: Using Shell Script
+**What happens when you run `make test-api`:**
+
+1. Cleans old reports (`rm -rf reports/`)
+2. Creates fresh report directories
+3. Executes Behave with `@api` tag
+4. Generates both Allure and Behave reports
+5. Opens Behave report in browser
+6. Launches Allure server automatically
+
+### Method 2: Using Behave CLI Directly
+
+For more control over test execution:
+
+```bash
+# Basic syntax
+venv/bin/behave [options] [tags] [features]
+
+# Run specific tag
+venv/bin/behave \
+  -f allure_behave.formatter:AllureFormatter -o reports/allure-results \
+  -f behave_html_pretty_formatter:PrettyHTMLFormatter -o reports/behave-html/report.html \
+  -t @api --no-skipped
+
+# Run all tests
+venv/bin/behave \
+  -f allure_behave.formatter:AllureFormatter -o reports/allure-results \
+  -f behave_html_pretty_formatter:PrettyHTMLFormatter -o reports/behave-html/report.html
+
+# Run specific feature file
+venv/bin/behave features/api/user_api.feature
+
+# Run with dry-run (validate steps without execution)
+venv/bin/behave --dry-run -t @api
+```
+
+### Method 3: Using Shell Script
 
 ```bash
 # Run tests with automatic report generation
 ./run_tests.sh
 ```
 
-### Method 3: Manual Command
-
-```bash
-# Run specific tag
-venv/bin/behave \
-  -f allure_behave.formatter:AllureFormatter -o reports/allure-results \
-  -f behave_html_pretty_formatter:PrettyHTMLFormatter -o reports/behave-html/report.html \
-  -t @get --no-skipped
-
-# Run all API tests
-venv/bin/behave \
-  -f allure_behave.formatter:AllureFormatter -o reports/allure-results \
-  -f behave_html_pretty_formatter:PrettyHTMLFormatter -o reports/behave-html/report.html \
-  -t @api
-
-# Run without tags (all tests)
-venv/bin/behave \
-  -f allure_behave.formatter:AllureFormatter -o reports/allure-results \
-  -f behave_html_pretty_formatter:PrettyHTMLFormatter -o reports/behave-html/report.html
-```
-
 ### Available Tags
 
-| Tag           | Description            | Example                          |
-| ------------- | ---------------------- | -------------------------------- |
-| `@api`        | All API tests          | `venv/bin/behave -t @api`        |
-| `@ui`         | All UI tests           | `venv/bin/behave -t @ui`         |
-| `@get`        | API GET request tests  | `venv/bin/behave -t @get`        |
-| `@post`       | API POST request tests | `venv/bin/behave -t @post`       |
-| `@smoke`      | Smoke tests            | `venv/bin/behave -t @smoke`      |
-| `@regression` | Regression tests       | `venv/bin/behave -t @regression` |
+Organize and filter tests using tags:
+
+| Tag           | Description            | Example Command                     |
+| ------------- | ---------------------- | ----------------------------------- |
+| `@api`        | All API tests          | `make test-api` or `behave -t @api` |
+| `@ui`         | All UI tests           | `make test-ui` or `behave -t @ui`   |
+| `@get`        | API GET request tests  | `behave -t @get`                    |
+| `@post`       | API POST request tests | `behave -t @post`                   |
+| `@smoke`      | Smoke tests            | `behave -t @smoke`                  |
+| `@regression` | Regression tests       | `behave -t @regression`             |
 
 ### Tag Combinations
 
 ```bash
-# Multiple tags (AND) - must have both
+# Multiple tags (AND) - must have both tags
 venv/bin/behave -t @api -t @smoke
 
-# Multiple tags (OR) - can have either
+# Multiple tags (OR) - can have either tag
 venv/bin/behave -t @api,@ui
 
-# Exclude tags
-venv/bin/behave -t ~@ui  # Run all except UI tests
+# Exclude specific tags
+venv/bin/behave -t ~@ui              # Run all except UI tests
+venv/bin/behave -t @api -t ~@wip     # Run API tests except work-in-progress
 ```
 
 ### Environment Selection
 
+Run tests against different environments:
+
 ```bash
-# Run tests on staging environment
+# Default (dev environment)
+make test-api
+
+# Staging environment
 ENV=staging venv/bin/behave -t @api
 
-# Run tests on production
+# Production environment (use with caution!)
 ENV=prod venv/bin/behave -t @smoke
+
+# With Makefile
+ENV=staging make test-api
 ```
+
+### Advanced Execution Options
+
+```bash
+# Parallel execution (requires behave-parallel)
+venv/bin/behave -t @api --processes 4
+
+# Generate JUnit XML (for CI/CD)
+venv/bin/behave -t @api --junit
+
+# Verbose output
+venv/bin/behave -t @api -v
+
+# Show all step definitions
+venv/bin/behave --steps-catalog
+
+# Format output
+venv/bin/behave -t @api --format plain     # Plain text
+venv/bin/behave -t @api --format json      # JSON output
+```
+
+---
+
+## What is Makefile?
+
+### 📚 Definition
+
+A **Makefile** is a special file that contains a set of directives (called "targets") used by the `make` build automation tool. It simplifies complex commands into short, memorable aliases.
+
+### 🎯 Purpose in This Framework
+
+Instead of typing long commands like:
+
+```bash
+rm -rf reports/allure-results reports/allure-report reports/behave-html
+mkdir -p reports/allure-results reports/behave-html
+venv/bin/behave \
+  -f allure_behave.formatter:AllureFormatter -o reports/allure-results \
+  -f behave_html_pretty_formatter:PrettyHTMLFormatter -o reports/behave-html/report.html \
+  --tags=@api --no-skipped
+allure serve reports/allure-results
+```
+
+You simply type:
+
+```bash
+make test-api
+```
+
+### 🔧 How It Works
+
+1. **Targets**: Each command in Makefile is called a "target"
+
+   ```makefile
+   test-api:           # Target name
+       @echo "Running API tests..."    # Command 1
+       venv/bin/behave -t @api         # Command 2
+   ```
+
+2. **Execution**: When you run `make test-api`, it executes all commands under that target
+
+3. **Dependencies**: Targets can depend on other targets
+   ```makefile
+   test: clean install    # Run 'clean' and 'install' first
+       behave             # Then run tests
+   ```
+
+### 📋 Available Makefile Commands
+
+```bash
+# View all available commands with descriptions
+make help
+```
+
+Output:
+
+```
+Available targets:
+  make install    - Install dependencies
+  make test-api   - Run API tests with @api tag
+  make test-ui    - Run UI tests with @ui tag
+  make test       - Run all tests
+  make report     - Generate and open reports
+  make clean      - Clean reports and cache
+```
+
+### ✨ Benefits of Using Makefile
+
+| Benefit              | Description                                |
+| -------------------- | ------------------------------------------ |
+| **Simplicity**       | Short, easy-to-remember commands           |
+| **Consistency**      | Same commands work across all environments |
+| **Automation**       | Combines multiple steps into one command   |
+| **Documentation**    | Self-documenting (run `make help`)         |
+| **Error Prevention** | Pre-configured with correct options        |
+
+### 💡 Makefile vs Behave Direct Command
+
+| Aspect                | Makefile (`make test-api`) | Behave CLI (`behave -t @api`)   |
+| --------------------- | -------------------------- | ------------------------------- |
+| **Ease of Use**       | ✅ Very simple             | ⚠️ Requires remembering options |
+| **Report Generation** | ✅ Automatic               | ❌ Manual                       |
+| **Report Opening**    | ✅ Automatic               | ❌ Manual                       |
+| **Directory Cleanup** | ✅ Automatic               | ❌ Manual                       |
+| **Flexibility**       | ⚠️ Pre-configured          | ✅ Full control                 |
+| **Best For**          | Daily testing              | Custom scenarios                |
+
+### 📖 When to Use What
+
+- **Use Makefile**:
+
+  - Daily development testing
+  - Quick smoke tests
+  - Standardized test execution
+  - Team collaboration (everyone uses same commands)
+
+- **Use Behave CLI**:
+  - Custom tag combinations
+  - Testing specific feature files
+  - Debugging individual scenarios
+  - Advanced Behave options
 
 ---
 
 ## Viewing Reports
 
-### 1. Behave HTML Report
+The framework generates two types of reports, each serving different purposes.
 
-Simple, static HTML report that can be opened directly:
+### 1. Behave HTML Report (Simple & Quick)
 
-```bash
-# Open in browser
-open reports/behave-html/report.html  # macOS
-xdg-open reports/behave-html/report.html  # Linux
-start reports/behave-html/report.html  # Windows
-```
+A lightweight, static HTML report that opens directly in your browser.
 
-### 2. Allure Report
-
-Interactive, feature-rich report with proper server:
+**How to View:**
 
 ```bash
-# Option 1: Use Allure serve (Recommended)
-allure serve reports/allure-results
+# After running tests, open the report
+open reports/behave-html/report.html          # macOS
+xdg-open reports/behave-html/report.html      # Linux
+start reports/behave-html/report.html         # Windows
 
-# Option 2: Use helper script
-./serve_allure.sh
-
-# Option 3: Generate static report (for CI/CD)
-allure generate reports/allure-results -o reports/allure-report --clean
+# Or use Makefile (auto-opens after test execution)
+make test-api
 ```
 
-**Why use `allure serve`?**
+**Features:**
 
-- Opens report with built-in HTTP server
-- Avoids CORS issues with JavaScript
-- Auto-refreshes on changes
-- Press Ctrl+C to stop the server
-
-### Report Features
-
-**Behave HTML Report includes:**
-
-- ✅ Scenario execution status
+- ✅ Clean, simple interface
+- ✅ Scenario execution status (Pass/Fail)
 - ✅ Step-by-step details
 - ✅ Execution time
-- ✅ Simple, clean interface
+- ✅ Screenshots (for UI test failures)
+- ✅ No server required - just open the file
 
-**Allure Report includes:**
+**Best For:**
 
-- ✅ All Behave HTML features plus:
-- ✅ Test history and trends
-- ✅ Screenshots and logs
-- ✅ Request/Response details for API tests
-- ✅ Retry information
-- ✅ Categories and behaviors
+- Quick glance at test results
+- Sharing with team (single HTML file)
+- Offline viewing
+
+---
+
+### 2. Allure Report (Interactive & Detailed)
+
+A feature-rich, interactive HTML report that requires a local server.
+
+**How to View:**
+
+```bash
+# Option 1: Using Allure CLI (Recommended)
+allure serve reports/allure-results
+# This opens a local server at http://localhost:RANDOM_PORT
+
+# Option 2: Using helper script
+./serve_allure.sh
+
+# Option 3: Generate static HTML (for sharing)
+allure generate reports/allure-results -o reports/allure-report --clean
+open reports/allure-report/index.html
+
+# Option 4: Using Makefile (auto-launches server)
+make test-api
+# After test completion, Allure server starts automatically
+```
+
+**Why Use Allure Serve?**
+
+Allure reports use JavaScript that requires a proper HTTP server:
+
+- ❌ Direct file opening (`file://`) causes CORS errors
+- ✅ `allure serve` starts a local server automatically
+- ✅ Auto-refreshes when new results are added
+- ✅ Port is randomly assigned to avoid conflicts
+- ✅ Press `Ctrl+C` to stop the server
+
+**Features:**
+
+- ✅ **All Behave HTML features PLUS:**
+- ✅ Test history and trends across multiple runs
+- ✅ Detailed request/response for API tests
+- ✅ Screenshots and video attachments
 - ✅ Timeline visualization
-- ✅ Graphical charts
+- ✅ Retry information
+- ✅ Categorized failures
+- ✅ Behavior graphs and charts
+- ✅ Environment details
+- ✅ Custom parameters and labels
+
+**Report Sections:**
+
+| Section        | Description                                          |
+| -------------- | ---------------------------------------------------- |
+| **Overview**   | Dashboard with pie charts, graphs, execution summary |
+| **Behaviors**  | Tests organized by features and stories              |
+| **Suites**     | Test suites and their scenarios                      |
+| **Graphs**     | Visual representation of test results                |
+| **Timeline**   | Time-based execution view                            |
+| **Categories** | Failure categorization                               |
+| **Packages**   | Tests grouped by package structure                   |
+
+**Best For:**
+
+- Detailed test analysis
+- Historical trend tracking
+- Debugging failures
+- Stakeholder presentations
+- CI/CD integration
+
+---
+
+### 📊 Report Comparison
+
+| Feature           | Behave HTML           | Allure Report           |
+| ----------------- | --------------------- | ----------------------- |
+| **Setup**         | None - just open file | Requires local server   |
+| **File Size**     | Small (KB)            | Larger (MB with assets) |
+| **Interactivity** | Basic                 | Advanced                |
+| **Test History**  | ❌ No                 | ✅ Yes                  |
+| **API Details**   | ❌ No                 | ✅ Request/Response     |
+| **Charts**        | ❌ No                 | ✅ Extensive            |
+| **Sharing**       | ✅ Single file        | ⚠️ Folder structure     |
+| **Offline**       | ✅ Yes                | ✅ Yes (generated)      |
+| **Best Use**      | Quick checks          | Deep analysis           |
+
+---
+
+## Live Reports on GitHub Pages
+
+When tests run via GitHub Actions on the `main` branch, both reports are automatically published to GitHub Pages!
+
+### 🌐 Setup GitHub Pages
+
+**One-time setup:**
+
+1. Go to your GitHub repository
+2. Navigate to **Settings** → **Pages**
+3. Under "Source", select **GitHub Actions**
+4. Click **Save**
+
+That's it! No additional configuration needed.
+
+### 📍 Accessing Live Reports
+
+After the next successful test run on `main` branch:
+
+**Main Dashboard:**
+
+```
+https://YOUR_USERNAME.github.io/YOUR_REPO/
+```
+
+This landing page provides a beautiful dashboard with links to both reports:
+
+```
+┌────────────────────────────────────────────────┐
+│         🧪 Test Reports Dashboard              │
+│    Latest test execution reports from CI/CD    │
+├────────────────────────────────────────────────┤
+│                                                │
+│  📊 Allure Report                             │
+│  Comprehensive test execution report with      │
+│  detailed analytics, graphs, and test history. │
+│                                                │
+│  [View Allure Report →]                       │
+│                                                │
+├────────────────────────────────────────────────┤
+│                                                │
+│  📝 Behave HTML Report                        │
+│  BDD-style test execution report showing       │
+│  scenarios, steps, and feature details.        │
+│                                                │
+│  [View Behave Report →]                       │
+│                                                │
+└────────────────────────────────────────────────┘
+```
+
+**Direct URLs:**
+
+- **Allure Report**: `https://YOUR_USERNAME.github.io/YOUR_REPO/allure-report/`
+- **Behave Report**: `https://YOUR_USERNAME.github.io/YOUR_REPO/behave-report/report.html`
+
+### 🔄 How It Works
+
+```
+1. You push code to `main` branch
+                ↓
+2. GitHub Actions triggers workflow
+                ↓
+3. Tests execute automatically
+                ↓
+4. Reports generated (Allure + Behave)
+                ↓
+5. Both reports uploaded as artifacts
+                ↓
+6. Deploy job publishes to GitHub Pages
+                ↓
+7. Reports available at public URL (within 1-2 minutes)
+```
+
+### ⏱️ Update Frequency
+
+- **Trigger**: Automatic on every push to `main` branch
+- **Duration**: Reports typically available within 5-10 minutes
+- **Retention**: Latest test run always visible
+- **History**: Allure shows trends across multiple runs
+
+### 🎯 Benefits of Live Reports
+
+| Benefit                 | Description                          |
+| ----------------------- | ------------------------------------ |
+| **Always Accessible**   | View from anywhere, no local setup   |
+| **Team Collaboration**  | Share single URL with entire team    |
+| **Stakeholder Access**  | Non-technical users can view results |
+| **Historical Tracking** | Allure maintains test trends         |
+| **No Maintenance**      | Auto-updates with each test run      |
+| **Professional**        | Clean, branded landing page          |
+
+### 🔗 Sharing Reports
+
+Share the main dashboard URL with:
+
+- QA team members
+- Developers
+- Product managers
+- Stakeholders
+
+Example message:
+
+```
+Latest test results are available at:
+https://yourusername.github.io/yourrepo/
+
+✅ All smoke tests passed
+📊 Allure Report for detailed analysis
+📝 Behave Report for BDD scenarios
+```
+
+### 📦 Artifact Reports (Fallback)
+
+If GitHub Pages is not enabled, reports are still available as downloadable artifacts:
+
+1. Go to **Actions** tab in your repository
+2. Click on the latest workflow run
+3. Scroll to **Artifacts** section
+4. Download:
+   - `allure-report` (ZIP file)
+   - `behave-html-report` (single HTML file)
+   - `test-logs` (execution logs)
+
+**Note**: Artifacts are available for 30 days (configurable in workflow).
 
 ---
 
 ## GitHub Actions CI/CD
 
-### Setup
+Automated testing pipeline that runs tests and publishes reports to GitHub Pages.
 
-1. **Push your code to GitHub**:
+### 🚀 Setup (One-Time)
+
+**1. Push Code to GitHub:**
 
 ```bash
+# Initialize git (if not already done)
+git init
+
+# Add all files
 git add .
-git commit -m "Initial commit"
-git push origin main
+
+# Commit
+git commit -m "Initial commit with BDD framework and CI/CD"
+
+# Add remote repository
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+
+# Push to GitHub
+git push -u origin main
 ```
 
-2. **GitHub Actions will automatically**:
-   - Run on every push and pull request
-   - Execute all tests with `@smoke` tag
-   - Generate Allure report
-   - Publish report as GitHub Pages (optional)
-   - Upload reports as artifacts
+**2. Enable GitHub Actions:**
 
-### Viewing CI/CD Results
+GitHub Actions is enabled by default. Workflow automatically runs when you push code.
 
-1. Go to your GitHub repository
-2. Click on **Actions** tab
-3. Select the latest workflow run
-4. View test results and download reports from **Artifacts** section
+**3. Enable GitHub Pages (for Live Reports):**
 
-### Manual Workflow Trigger
+1. Go to repository **Settings** → **Pages**
+2. Under "Source", select **GitHub Actions**
+3. Click **Save**
 
-You can manually trigger the workflow with custom tags:
+Done! Your reports will now be published automatically.
+
+### ⚙️ Workflow Features
+
+#### Automatic Triggers
+
+The workflow (`[.github/workflows/tests.yml](.github/workflows/tests.yml)`) runs automatically when:
+
+1. **Push to `main` or `develop` branch**
+
+   - Runs tests with `@smoke` tag
+   - Tests against `dev` environment
+   - Publishes reports to GitHub Pages (main branch only)
+
+2. **Pull Request to `main` or `develop`**
+   - Validates changes before merging
+   - Runs smoke tests to ensure quality
+   - Reports available as artifacts (not published)
+
+#### Manual Trigger
+
+You can manually run tests with custom parameters:
+
+1. Go to your repository on GitHub
+2. Click **Actions** tab
+3. Select "**BDD Tests**" workflow
+4. Click **Run workflow** button
+5. Choose your options:
+   - **Branch**: Which branch to run from
+   - **Tags**: Behave tags (e.g., `@api`, `@smoke`, `@regression`)
+   - **Environment**: Target environment (`dev`, `staging`, `prod`)
+6. Click **Run workflow**
+
+**Example Scenarios:**
+
+| Scenario               | Tags     | Environment |
+| ---------------------- | -------- | ----------- |
+| Quick validation       | `@smoke` | `dev`       |
+| Full API regression    | `@api`   | `staging`   |
+| Production smoke check | `@smoke` | `prod`      |
+| UI tests only          | `@ui`    | `dev`       |
+
+### 📋 Workflow Steps
+
+```yaml
+1. ✅ Checkout code from repository
+2. ✅ Setup Python 3.10 with pip cache
+3. ✅ Install dependencies (behave, selenium, allure, etc.)
+4. ✅ Install Chrome browser (for UI tests)
+5. ✅ Install Allure command-line tool
+6. ✅ Create report directories
+7. ✅ Run Behave tests with specified tags
+8. ✅ Generate Allure HTML report
+9. ✅ Upload Behave HTML report as artifact
+10. ✅ Upload Allure results as artifact
+11. ✅ Upload Allure report as artifact
+12. ✅ Upload test logs as artifact
+13. ✅ Create landing page with links to both reports
+14. ✅ Deploy both reports to GitHub Pages (main branch only)
+15. ✅ Display test summary in workflow
+```
+
+### 📊 Viewing CI/CD Results
+
+#### Test Summary
+
+After workflow completes:
 
 1. Go to **Actions** tab
-2. Select "**BDD Tests**" workflow
-3. Click **Run workflow**
-4. Enter custom tags (e.g., `@api`, `@regression`)
-5. Click **Run workflow**
+2. Click on the workflow run
+3. View **Summary** section with:
+   - ✅ Test execution details
+   - ✅ Environment used
+   - ✅ Tags executed
+   - ✅ Python version
+   - ✅ Links to artifacts
 
-### GitHub Pages for Allure Report
+#### Download Artifacts
 
-To enable automatic Allure report publishing:
+In the workflow run page, scroll to **Artifacts** section:
 
-1. Go to repository **Settings** > **Pages**
-2. Source: **GitHub Actions**
-3. After each test run, report will be available at:
-   `https://<username>.github.io/<repo-name>/`
+| Artifact             | Contents                         | Size    |
+| -------------------- | -------------------------------- | ------- |
+| `behave-html-report` | Simple HTML report (single file) | ~100 KB |
+| `allure-report`      | Complete Allure HTML report      | ~2-5 MB |
+| `allure-results`     | Raw JSON results                 | ~500 KB |
+| `test-logs`          | Execution logs                   | ~50 KB  |
+
+**Retention**: Artifacts are kept for 30 days.
+
+#### GitHub Pages Reports
+
+If Pages is enabled, visit:
+
+```
+https://YOUR_USERNAME.github.io/YOUR_REPO/
+```
+
+Reports are published automatically after successful runs on `main` branch.
+
+### 🔔 Test Status Indicators
+
+In GitHub:
+
+- ✅ **Green checkmark** - All tests passed
+- ❌ **Red X** - Some tests failed
+- 🟡 **Yellow dot** - Tests are running
+- ⚪ **Gray circle** - Tests skipped/cancelled
+
+On your repository's main page, you'll see the status badge.
+
+### 🎨 Customization Options
+
+#### Change Default Tags
+
+Edit [.github/workflows/tests.yml](.github/workflows/tests.yml):
+
+```yaml
+workflow_dispatch:
+  inputs:
+    tags:
+      default: "@regression" # Change from @smoke
+```
+
+#### Add More Environments
+
+1. Create new config: `config/environments/qa.yaml`
+2. Update workflow options:
+
+```yaml
+environment:
+  type: choice
+  options:
+    - dev
+    - staging
+    - qa # New environment
+    - prod
+```
+
+#### Run on More Branches
+
+```yaml
+on:
+  push:
+    branches: [main, develop, feature/*, release/*]
+```
+
+#### Schedule Nightly Runs
+
+```yaml
+on:
+  schedule:
+    - cron: "0 2 * * *" # Daily at 2 AM UTC
+```
+
+#### Add Slack Notifications
+
+```yaml
+- name: Notify Slack
+  if: always()
+  uses: 8398a7/action-slack@v3
+  with:
+    status: ${{ job.status }}
+    webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+```
+
+### 📈 Best Practices
+
+1. **Use Tags Wisely**
+
+   - `@smoke` for quick validation
+   - `@regression` for comprehensive testing
+   - `@critical` for must-pass scenarios
+
+2. **Environment Strategy**
+
+   - `dev` for feature branches
+   - `staging` for release candidates
+   - `prod` for smoke tests only
+
+3. **Branch Protection**
+
+   - Require status checks before merge
+   - Run smoke tests on PRs
+   - Full regression on main branch
+
+4. **Monitor Failures**
+   - Check Allure trends regularly
+   - Review failure categories
+   - Fix flaky tests immediately
+
+### 🔗 Workflow File Location
+
+View or edit the workflow:
+
+- [.github/workflows/tests.yml](.github/workflows/tests.yml)
+
+Detailed documentation:
+
+- [GITHUB_ACTIONS.md](GITHUB_ACTIONS.md)
+- [REPORTS_PUBLISHING_GUIDE.md](REPORTS_PUBLISHING_GUIDE.md)
 
 ---
 
@@ -543,6 +1203,257 @@ pip install webdriver-manager
 3. Commit changes (`git commit -m 'Add amazing feature'`)
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+---
+
+## 🚀 Quick Reference Guide
+
+### Common Commands Cheat Sheet
+
+```bash
+# ===== INSTALLATION =====
+python3.10 -m venv venv                    # Create virtual environment
+source venv/bin/activate                   # Activate (macOS/Linux)
+pip install -r requirements.txt            # Install dependencies
+
+# ===== RUNNING TESTS (Makefile) =====
+make help                                  # Show all available commands
+make test-api                              # Run API tests
+make test-ui                               # Run UI tests
+make test                                  # Run all tests
+make clean                                 # Clean reports and cache
+
+# ===== RUNNING TESTS (Behave CLI) =====
+behave -t @smoke                          # Run smoke tests
+behave -t @api                            # Run API tests
+behave -t @ui                             # Run UI tests
+behave -t @regression                     # Run regression tests
+behave -t @api -t @smoke                  # AND condition (both tags)
+behave -t @api,@ui                        # OR condition (either tag)
+behave -t ~@wip                           # Exclude work-in-progress
+
+# ===== WITH ENVIRONMENTS =====
+ENV=dev make test-api                     # Dev environment
+ENV=staging behave -t @api                # Staging environment
+ENV=prod behave -t @smoke                 # Production environment
+
+# ===== VIEWING REPORTS =====
+allure serve reports/allure-results       # Open Allure report
+open reports/behave-html/report.html      # Open Behave report
+./serve_allure.sh                         # Helper script for Allure
+
+# ===== CLEANUP =====
+make clean                                # Clean all reports
+rm -rf reports/ logs/ __pycache__/        # Deep clean
+```
+
+### Report URLs
+
+| Location                   | URL/Path                                                              |
+| -------------------------- | --------------------------------------------------------------------- |
+| **Local Behave Report**    | `reports/behave-html/report.html`                                     |
+| **Local Allure Report**    | `allure serve reports/allure-results`                                 |
+| **GitHub Pages Dashboard** | `https://YOUR_USERNAME.github.io/YOUR_REPO/`                          |
+| **GitHub Pages Allure**    | `https://YOUR_USERNAME.github.io/YOUR_REPO/allure-report/`            |
+| **GitHub Pages Behave**    | `https://YOUR_USERNAME.github.io/YOUR_REPO/behave-report/report.html` |
+| **CI/CD Artifacts**        | GitHub → Actions → Workflow Run → Artifacts                           |
+
+### Project Structure at a Glance
+
+```
+📁 features/          → BDD test scenarios (Gherkin)
+📁 features/steps/    → Step implementations (Python)
+📁 pages/             → Page Objects (UI automation)
+📁 api/               → API clients
+📁 config/            → Environment configurations
+📁 utilities/         → Helper functions
+📁 reports/           → Generated test reports
+📁 logs/              → Execution logs
+📄 Makefile           → Quick test commands
+📄 requirements.txt   → Python dependencies
+```
+
+### Makefile Commands Explained
+
+| Command         | What It Does                      | When to Use                            |
+| --------------- | --------------------------------- | -------------------------------------- |
+| `make help`     | Shows all available commands      | First time using framework             |
+| `make install`  | Installs dependencies             | Initial setup or after pulling changes |
+| `make test-api` | Runs API tests, generates reports | Testing API endpoints                  |
+| `make test-ui`  | Runs UI tests, generates reports  | Testing web interfaces                 |
+| `make test`     | Runs all tests                    | Full regression testing                |
+| `make clean`    | Removes old reports and cache     | Before fresh test run                  |
+| `make report`   | Generates and opens reports       | After manual behave run                |
+
+### Test Tags Reference
+
+| Tag           | Purpose              | Example Tests                   |
+| ------------- | -------------------- | ------------------------------- |
+| `@api`        | API/backend tests    | GET, POST, PUT, DELETE requests |
+| `@ui`         | User interface tests | Login, navigation, forms        |
+| `@smoke`      | Critical path tests  | Basic functionality check       |
+| `@regression` | Full test suite      | Complete feature validation     |
+| `@get`        | GET API requests     | Retrieve data operations        |
+| `@post`       | POST API requests    | Create operations               |
+| `@wip`        | Work in progress     | Tests under development         |
+
+### GitHub Actions Workflow Triggers
+
+| Trigger               | When It Runs | Default Tags | Publishes Reports      |
+| --------------------- | ------------ | ------------ | ---------------------- |
+| **Push to `main`**    | Automatic    | `@smoke`     | ✅ Yes (GitHub Pages)  |
+| **Push to `develop`** | Automatic    | `@smoke`     | ❌ No (Artifacts only) |
+| **Pull Request**      | Automatic    | `@smoke`     | ❌ No (Artifacts only) |
+| **Manual Trigger**    | On demand    | Custom       | Depends on branch      |
+
+### Environment Configuration Files
+
+| File                               | Purpose     | Contains                    |
+| ---------------------------------- | ----------- | --------------------------- |
+| `config/environments/dev.yaml`     | Development | Dev URLs, test credentials  |
+| `config/environments/staging.yaml` | Staging     | Staging URLs, test data     |
+| `config/environments/prod.yaml`    | Production  | Production URLs (read-only) |
+
+### Where to Find Things
+
+| What You're Looking For | Location                        |
+| ----------------------- | ------------------------------- |
+| Test scenarios          | `features/api/`, `features/ui/` |
+| Step definitions        | `features/steps/`               |
+| Page objects            | `pages/`                        |
+| API clients             | `api/`                          |
+| Configuration           | `config/environments/`          |
+| Reports                 | `reports/`                      |
+| Logs                    | `logs/`                         |
+| CI/CD workflow          | `.github/workflows/tests.yml`   |
+| Dependencies            | `requirements.txt`              |
+
+### Typical Workflows
+
+#### 1. Daily Development Testing
+
+```bash
+# Pull latest code
+git pull
+
+# Run smoke tests
+make test-api
+
+# View results
+# Allure server opens automatically
+# Behave report opens in browser
+```
+
+#### 2. Pre-Commit Testing
+
+```bash
+# Run tests for your changes
+ENV=dev behave -t @smoke
+
+# Check results
+open reports/behave-html/report.html
+
+# If passed, commit
+git add .
+git commit -m "Your changes"
+git push
+```
+
+#### 3. Full Regression (Local)
+
+```bash
+# Clean old reports
+make clean
+
+# Run everything
+ENV=staging make test
+
+# Review detailed Allure report
+# Server starts automatically
+```
+
+#### 4. Testing Specific Feature
+
+```bash
+# Run specific feature file
+behave features/api/user_api.feature
+
+# Or with specific scenario
+behave features/api/user_api.feature:10  # Line number
+```
+
+#### 5. CI/CD Deployment
+
+```bash
+# Push to main branch
+git push origin main
+
+# GitHub Actions automatically:
+# 1. Runs smoke tests
+# 2. Generates reports
+# 3. Publishes to GitHub Pages
+# 4. Makes artifacts available
+
+# View live reports at:
+# https://YOUR_USERNAME.github.io/YOUR_REPO/
+```
+
+### Troubleshooting Quick Fixes
+
+| Issue                       | Solution                                       |
+| --------------------------- | ---------------------------------------------- |
+| `make: command not found`   | Install make: `brew install make` (macOS)      |
+| `behave: command not found` | Use `venv/bin/behave` or activate venv         |
+| `allure: command not found` | Install: `brew install allure` (macOS)         |
+| Allure report shows blank   | Use `allure serve` instead of opening HTML     |
+| Old test results showing    | Run `make clean` before tests                  |
+| Browser not opening         | Check Chrome is installed, use `HEADLESS=true` |
+| Permission denied           | Run `chmod +x run_tests.sh serve_allure.sh`    |
+
+### Key Files to Know
+
+| File                          | Purpose        | Edit When                 |
+| ----------------------------- | -------------- | ------------------------- |
+| `Makefile`                    | Test shortcuts | Adding new test targets   |
+| `requirements.txt`            | Dependencies   | Adding new packages       |
+| `features/environment.py`     | Test hooks     | Setup/teardown logic      |
+| `.github/workflows/tests.yml` | CI/CD          | Changing automation       |
+| `config/config.py`            | Config loader  | Changing config structure |
+
+### Performance Tips
+
+```bash
+# Run tests in parallel (faster)
+behave --processes 4 -t @api
+
+# Run without Allure (faster)
+behave -t @smoke --format pretty
+
+# Headless browser (faster for UI)
+HEADLESS=true behave -t @ui
+
+# Skip specific tests
+behave -t ~@slow -t @api
+```
+
+### Getting Help
+
+```bash
+# Behave help
+behave --help
+
+# Show available tags
+behave --tags-help
+
+# List all step definitions
+behave --steps-catalog
+
+# Dry run (validate without executing)
+behave --dry-run -t @api
+
+# Makefile help
+make help
+```
 
 ---
 
