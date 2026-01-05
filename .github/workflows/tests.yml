@@ -1,0 +1,167 @@
+name: BDD Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: "Behave tags to run (e.g., @smoke, @api, @regression)"
+        required: false
+        default: "@smoke"
+      environment:
+        description: "Environment to test against"
+        required: false
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+          pip install behave-html-pretty-formatter
+
+      - name: Install Chrome (for UI tests)
+        uses: browser-actions/setup-chrome@latest
+        with:
+          chrome-version: stable
+
+      - name: Install Allure
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/allure-framework/allure2/releases/download/2.25.0/allure_2.25.0-1_all.deb
+          sudo dpkg -i allure_2.25.0-1_all.deb
+          allure --version
+
+      - name: Create reports directories
+        run: |
+          mkdir -p reports/allure-results
+          mkdir -p reports/behave-html
+
+      - name: Run tests
+        env:
+          ENV: ${{ github.event.inputs.environment || 'dev' }}
+          HEADLESS: true
+        run: |
+          TAGS="${{ github.event.inputs.tags || '@smoke' }}"
+          echo "Running tests with tags: $TAGS"
+          behave \
+            -f allure_behave.formatter:AllureFormatter -o reports/allure-results \
+            -f behave_html_pretty_formatter:PrettyHTMLFormatter -o reports/behave-html/report.html \
+            -t "$TAGS" --no-skipped || true
+
+      - name: Generate Allure Report
+        if: always()
+        run: |
+          allure generate reports/allure-results -o reports/allure-report --clean
+
+      - name: Upload Behave HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: behave-html-report
+          path: reports/behave-html/report.html
+          retention-days: 30
+
+      - name: Upload Allure Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: reports/allure-results
+          retention-days: 30
+
+      - name: Upload Allure Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: reports/allure-report
+          retention-days: 30
+
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs
+          path: logs/
+          retention-days: 30
+
+      - name: Publish Allure Report to GitHub Pages
+        if: always() && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./reports/allure-report
+          destination_dir: allure-report
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ github.event.inputs.environment || 'dev' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tags:** ${{ github.event.inputs.tags || '@smoke' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Python Version:** ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Reports Available in Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Behave HTML Report" >> $GITHUB_STEP_SUMMARY
+          echo "- Allure Report" >> $GITHUB_STEP_SUMMARY
+          echo "- Test Logs" >> $GITHUB_STEP_SUMMARY
+
+  # Optional: Deploy Allure Report to GitHub Pages
+  deploy-report:
+    needs: test
+    if: always() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download Allure Report
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-report
+          path: ./allure-report
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./allure-report
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

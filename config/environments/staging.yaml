@@ -1,0 +1,9 @@
+environment: staging
+base_url: https://staging.example.com
+api_base_url: https://api-staging.example.com
+credentials:
+  username: testuser@example.com
+  password: TestPass123
+timeout:
+  api: 30
+  ui: 20
