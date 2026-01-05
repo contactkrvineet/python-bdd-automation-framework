@@ -113,7 +113,7 @@ jobs:
           retention-days: 30
 
       - name: Create index page for reports
-        if: always() && github.ref == 'refs/heads/main'
+        if: always() && github.ref == 'refs/heads/master'
         run: |
           mkdir -p reports/gh-pages
           cat > reports/gh-pages/index.html << 'EOF'
@@ -199,7 +199,7 @@ jobs:
           EOF
 
       - name: Copy reports to gh-pages directory
-        if: always() && github.ref == 'refs/heads/main'
+        if: always() && github.ref == 'refs/heads/master'
         run: |
           cp -r reports/allure-report reports/gh-pages/allure-report
           mkdir -p reports/gh-pages/behave-report
@@ -222,7 +222,7 @@ jobs:
   # Deploy Both Reports to GitHub Pages
   deploy-reports:
     needs: test
-    if: always() && github.ref == 'refs/heads/main'
+    if: always() && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       pages: write
